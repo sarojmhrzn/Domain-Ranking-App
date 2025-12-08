@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DomainRank from '@/components/DomainRank.vue'
+import DomainRank from './components/DomainRank.vue'
 </script>
 
 <template>
