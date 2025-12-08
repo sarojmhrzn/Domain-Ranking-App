@@ -37,4 +37,4 @@ __screenshots__/
 
 # Environment variables
 *env
-.env
+*.env
