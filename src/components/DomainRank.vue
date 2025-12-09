@@ -32,7 +32,7 @@ async function fetchRank() {
   if (!domain.value) return
 
   try {
-    const response = await fetch(`${API_BASE}/ranking/${domain.value}`)
+    const response = await fetch(`${API_BASE}/ranking/${domain.value.toLowerCase()}`)
     if (!response.ok) throw new Error('Failed to fetch data')
 
     const data = await response.json()
