@@ -26,59 +26,36 @@ const latestRank = ref(null)
 const chartRef = ref(null)
 let chartInstance = null
 
-// Dummy rank data (your backend will replace this later)
-const dummyData = {
-  labels: [
-    'Oct 27',
-    'Oct 28',
-    'Oct 29',
-    'Oct 30',
-    'Oct 31',
-    'Nov 1',
-    'Nov 2',
-    'Nov 3',
-    'Nov 4',
-    'Nov 5',
-    'Nov 6',
-    'Nov 7',
-    'Nov 8',
-    'Nov 9',
-    'Nov 10',
-    'Nov 11',
-    'Nov 12',
-    'Nov 13',
-    'Nov 14',
-    'Nov 15',
-    'Nov 16',
-    'Nov 17',
-    'Nov 18',
-    'Nov 19',
-    'Nov 20',
-  ],
-  ranks: [
-    11890, 11800, 11710, 11620, 11530, 11420, 11310, 11200, 11100, 10950, 10720, 10580, 9500, 9100,
-    8600, 8000, 7990, 8010, 8005, 8012, 8020, 8030, 8050, 8080, 8100,
-  ],
+const API_BASE = import.meta.env.VITE_API_BASE
+
+async function fetchRank() {
+  if (!domain.value) return
+
+  try {
+    const response = await fetch(`${API_BASE}/ranking/${domain.value}`)
+    if (!response.ok) throw new Error('Failed to fetch data')
+
+    const data = await response.json()
+
+    latestRank.value = data.ranks[data.ranks.length - 1]
+    renderChart(data.labels, data.ranks)
+  } catch (err) {
+    console.error('Error fetching rank:', err)
+    alert('Failed to fetch rank data. Try another domain.')
+  }
 }
 
-function fetchRank() {
-  // Fill latest rank
-  latestRank.value = dummyData.ranks[dummyData.ranks.length - 1]
-
-  renderChart()
-}
-
-function renderChart() {
+function renderChart(labels, ranks) {
   if (chartInstance) chartInstance.destroy()
 
   chartInstance = new Chart(chartRef.value, {
     type: 'line',
     data: {
-      labels: dummyData.labels,
+      labels,
       datasets: [
         {
           label: domain.value,
-          data: dummyData.ranks,
+          data: ranks,
           borderColor: '#3b82f6',
           backgroundColor: '#3b82f6',
           pointRadius: 4,
