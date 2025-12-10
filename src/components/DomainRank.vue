@@ -21,47 +21,87 @@ Chart.register(
   Legend,
 )
 
-const domain = ref('onlinekhabar.com')
-const latestRank = ref(null)
+const domain = ref('')
+const labels = ref([])
+const datasets = ref([])
+const latestRanks = ref({})
 const chartRef = ref(null)
 let chartInstance = null
 
 const API_BASE = import.meta.env.VITE_API_BASE
 
-async function fetchRank() {
-  if (!domain.value) return
+function randomColor() {
+  return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`
+}
 
+async function fetchRank() {
+  // Reset old values
+  labels.value = []
+  datasets.value = []
+  latestRanks.value = {}
+
+  const domainList = domain.value
+    .split(',')
+    .map((d) => d.trim().toLowerCase())
+    .filter((d) => d.length > 0)
+
+  for (const d of domainList) {
+    await fetchSingleDomain(d)
+  }
+
+  renderChart()
+}
+
+async function fetchSingleDomain(d) {
   try {
-    const response = await fetch(`${API_BASE}/ranking/${domain.value.toLowerCase()}`)
-    if (!response.ok) throw new Error('Failed to fetch data')
+    const response = await fetch(`${API_BASE}/ranking/${d}`)
+    if (!response.ok) throw new Error('API Error')
 
     const data = await response.json()
 
-    latestRank.value = data.ranks[data.ranks.length - 1]
-    renderChart(data.labels, data.ranks)
+    latestRanks.value[d] = data.ranks[data.ranks.length - 1]
+
+    // Convert data
+    const domainLabels = data.labels
+    const domainRanks = data.ranks
+
+    // initialize label if empty
+    if (labels.value.length === 0) {
+      labels.value = domainLabels
+    }
+
+    if (labels.value.length === 0) {
+      labels.value = data.labels
+    }
+
+    const minLength = Math.min(labels.value.length, domainLabels.length)
+
+    labels.value = labels.value.slice(-minLength)
+
+    const alignedRanks = domainRanks.slice(-minLength)
+
+    // Add dataset
+    datasets.value.push({
+      label: d,
+      data: alignedRanks,
+      borderColor: randomColor(),
+      backgroundColor: randomColor(),
+      pointRadius: 3,
+      tension: 0.3,
+    })
   } catch (err) {
-    console.error('Error fetching rank:', err)
-    alert('Failed to fetch rank data. Try another domain.')
+    console.error('Error fetching', d, err)
   }
 }
 
-function renderChart(labels, ranks) {
+function renderChart() {
   if (chartInstance) chartInstance.destroy()
 
   chartInstance = new Chart(chartRef.value, {
     type: 'line',
     data: {
-      labels,
-      datasets: [
-        {
-          label: domain.value,
-          data: ranks,
-          borderColor: '#3b82f6',
-          backgroundColor: '#3b82f6',
-          pointRadius: 4,
-          tension: 0.3,
-        },
-      ],
+      labels: labels.value,
+      datasets: datasets.value,
     },
     options: {
       responsive: true,
@@ -89,14 +129,17 @@ function renderChart(labels, ranks) {
 
     <!-- SEARCH BAR -->
     <div class="search">
-      <input v-model="domain" placeholder="onlinekhabar.com" class="input" />
-      <button class="btn" @click="fetchRank">Get rank</button>
+      <input v-model="domain" placeholder="google.com" class="input" />
+      <button class="btn" @click="fetchRank">Get Rank</button>
     </div>
 
     <!-- LATEST RANK INFO -->
-    <p v-if="latestRank" class="latest">
-      The latest rank for <strong>{{ domain }}</strong> is {{ latestRank }}
-    </p>
+    <div v-if="latestRanks && Object.keys(latestRanks).length" class="latest">
+      <p v-for="(rank, domain) in latestRanks" :key="domain">
+        Latest rank for <strong>{{ domain }}</strong
+        >: {{ rank }}
+      </p>
+    </div>
 
     <!-- CHART -->
     <div class="chart-container">
