@@ -27,6 +27,7 @@ const datasets = ref([])
 const latestRanks = ref({})
 const chartRef = ref(null)
 let chartInstance = null
+let isLoading = ref(false)
 
 const API_BASE = import.meta.env.VITE_API_BASE
 
@@ -53,6 +54,9 @@ async function fetchRank() {
 }
 
 async function fetchSingleDomain(d) {
+  // Start loading...
+  isLoading.value = true
+
   try {
     const response = await fetch(`${API_BASE}/ranking/${d}`)
     if (!response.ok) throw new Error('API Error')
@@ -89,8 +93,13 @@ async function fetchSingleDomain(d) {
       pointRadius: 3,
       tension: 0.3,
     })
+
+    isLoading.value = false
   } catch (err) {
+    isLoading.value = false
     console.error('Error fetching', d, err)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -123,6 +132,12 @@ function renderChart() {
 </script>
 
 <template>
+  <!-- Loading bar -->
+  <div v-if="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Fetching rank data...</p>
+  </div>
+
   <div class="page">
     <h1 class="title">Get your domain rank</h1>
     <p class="subtitle">It uses tranco api to get ranking data under the hood.</p>
@@ -130,7 +145,7 @@ function renderChart() {
     <!-- SEARCH BAR -->
     <div class="search">
       <input v-model="domain" placeholder="google.com" class="input" />
-      <button class="btn" @click="fetchRank">Get Rank</button>
+      <button class="btn" @click="fetchRank" :disabled="isLoading">Get Rank</button>
     </div>
 
     <!-- LATEST RANK INFO -->
@@ -201,5 +216,49 @@ function renderChart() {
 
 .chart-container {
   margin-top: 20px;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(1px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  width: 55px;
+  height: 55px;
+  border: 6px solid #ccc;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  margin-top: 12px;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
