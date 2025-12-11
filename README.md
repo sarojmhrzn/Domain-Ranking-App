@@ -1,48 +1,45 @@
-# domain-ranking-app
+# Domain Ranking App - Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+A simple and modern Vue.js application developed in Vue 3 that allows users to fetch and visualize Tranco domain ranking trends.
+The app displays historical rank data on interactive line charts using Chart.js and supports multiple domain comparisons.
 
-## Recommended IDE Setup
+This frontend connects to the companion NestJS backend that fetches rank data from the Tranco API and performs caching using PostgreSQL (Neon DB).
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Features
 
-## Recommended Browser Setup
+- Search Any Domain
+  Enter any domain name (e.g., google.com, facebook.com) and get data fetched from Tranco Rank
+- Compare Multiple Domains
+  Users can enter comma-separated domains, and the UI will dynamically display multiple datasets on a single chart.
+  ```bash
+    google.com, facebook.com, apple.com
+  ```
+- Backend driven with Caching
+  The frontend retrieves all data from your NestJS backend via the /ranking/:domain API.
+- Loading UI Feedback
+  Full-screen blurred overlay with spinner
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Tech Stack
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Vue 3 + Vite
+- Chart.js
+- Tailwind + Custom CSS
 
 ## Project Setup
 
-```sh
-npm install
+Create a .env file in your project root:
+
+```bash
+VITE_API_BASE=https://your-backend-url.com
 ```
 
-### Compile and Hot-Reload for Development
+For Development
 
-```sh
-npm run dev
-```
+```bash
+# development
+$ npm install
+$ npm run dev
 
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+# build
+$ npm run build
 ```
