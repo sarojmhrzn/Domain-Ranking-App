@@ -15,7 +15,10 @@ This frontend connects to the companion NestJS backend that fetches rank data fr
     google.com, facebook.com, apple.com
   ```
 - Backend driven with Caching
-  The frontend retrieves all data from your NestJS backend via the /ranking/:domain API.
+  The frontend retrieves all data from your NestJS backend via API
+  ```bash
+  /ranking/:domain
+  ```
 - Loading UI Feedback
   Full-screen blurred overlay with spinner
 
