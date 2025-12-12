@@ -28,6 +28,7 @@ const latestRanks = ref({})
 const chartRef = ref(null)
 let chartInstance = null
 let isLoading = ref(false)
+let noRankMessages = ref({})
 
 const API_BASE = import.meta.env.VITE_API_BASE
 
@@ -62,6 +63,15 @@ async function fetchSingleDomain(d) {
     if (!response.ok) throw new Error('API Error')
 
     const data = await response.json()
+
+    // Handle domain with no Tranco data
+    if (!data.ranks || data.ranks.length === 0) {
+      noRankMessages.value[d] =
+        'This domain is currently outside Tranco’s Top 1M, but may appear occasionally in historical rankings.'
+      return
+    }
+
+    noRankMessages.value = ''
 
     latestRanks.value[d] = data.ranks[data.ranks.length - 1]
 
@@ -153,6 +163,14 @@ function renderChart() {
       <p v-for="(rank, domain) in latestRanks" :key="domain">
         Latest rank for <strong>{{ domain }}</strong
         >: {{ rank }}
+      </p>
+    </div>
+
+    <!-- NO RANK MESSAGE -->
+    <div v-if="Object.keys(noRankMessages).length" class="no-rank">
+      <p v-for="(msg, domain) in noRankMessages" :key="domain">
+        <strong>{{ domain }}</strong
+        >: {{ msg }}
       </p>
     </div>
 
@@ -260,5 +278,15 @@ function renderChart() {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.no-rank {
+  background: #f8fafc;
+  border-left: 4px solid #f59e0b;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  color: #92400e;
+  font-size: 15px;
 }
 </style>
