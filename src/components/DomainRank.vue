@@ -71,7 +71,7 @@ async function fetchSingleDomain(d) {
       return
     }
 
-    noRankMessages.value = ''
+    noRankMessages.value = {}
 
     latestRanks.value[d] = data.ranks[data.ranks.length - 1]
 
